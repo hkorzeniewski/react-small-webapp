@@ -1,25 +1,70 @@
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import { useState, useEffect } from "react";
+import Header from "./components/Header";
+import AddActivity from "./components/AddActivity";
+import Activities from "./components/Activities";
+import { BrowserRouter as Router, Route } from "react-router-dom";
+import SumActivities from "./components/SumActivities";
+import Sum from "./components/Sum"
 
-function App() {
+const App = () => {
+  const [showAddActivity, setShowAddActivity] = useState(false);
+  const [activities, setActivities] = useState([]);
+  const [showActivities, setShowActivities] = useState(false);
+
+  useEffect(() => {
+    const getActivities = async () => {
+      const activitiesFromServer = await fetchActivities();
+      setActivities(activitiesFromServer);
+    };
+    getActivities();
+  }, []);
+
+  const fetchActivities = async () => {
+    const res = await fetch("http://localhost:5000/activities");
+    const data = await res.json();
+
+    return data;
+  };
+
+  const addActivity = async (activity) => {
+    const res = await fetch("http://localhost:5000/activities", {
+      method: "POST",
+      headers: {
+        "Content-type": "application/json",
+      },
+      body: JSON.stringify(activity),
+    });
+
+    const data = await res.json();
+    setActivities([...activities, data]);
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <div className="container">
+        <Header
+          onAdd={() => setShowAddActivity(!showAddActivity)}
+          showAdd={showAddActivity}
+          onShow={() => setShowActivities(!showActivities)}
+          showShow={showActivities}
+        />
+        <Route
+          path="/"
+          exact
+          render={(props) => (
+            <>
+              {showActivities && <Activities activities={activities} />}
+              {showAddActivity && <AddActivity onAdd={addActivity} />}
+            </>
+          )}
+        />
+        
+        <Route path="/sum" component={SumActivities}/>
+        {/* <Sum activities={activities} /> */}
+      </div>
+    </Router>
   );
-}
+};
 
 export default App;
