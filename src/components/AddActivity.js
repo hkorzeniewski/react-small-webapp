@@ -40,7 +40,7 @@ const AddActivity = ( {onAdd} ) => {
 
       <input type="submit" value="Add Activity" />
     </form>
-  );
-};
+  )
+}
 
 export default AddActivity;
